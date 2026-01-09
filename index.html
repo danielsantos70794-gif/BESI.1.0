@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BESI IA | Terminal Alpha Quantitativo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --card-bg: #0d0d0e;
+            --accent-purple: #8B5CF6;
+            --accent-cyan: #06B6D4;
+            --text-main: #F8FAFC;
+            --text-dim: #64748B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* --- LOADSCREEN CORRIGIDA --- */
+        #loader { 
+            position: fixed; 
+            inset: 0; 
+            background: var(--bg-dark); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        #loader .logo { 
+            font-size: clamp(3rem, 10vw, 4.5rem); 
+            margin-bottom: 10px; 
+            line-height: 1;
+        }
+
+        #loader .tagline {
+            color: var(--text-dim);
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            font-weight: 500;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .btn-modern {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--accent-purple), #6366f1);
+            color: white; border: none; border-radius: 12px;
+            font-weight: 700; cursor: pointer; font-family: 'Space Grotesk';
+            text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            text-decoration: none; display: inline-block;
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5); filter: brightness(1.1); }
+
+        /* --- HEADER & DASHBOARD --- */
+        header { padding: 20px 8%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; }
+        .logo { font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; }
+        .logo span { color: var(--accent-purple); }
+
+        .dashboard { padding: 40px 8%; max-width: 1300px; margin: 0 auto; }
+        .grid-assets { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .asset-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: 0.5s; position: relative; }
+        .locked { filter: blur(5px); opacity: 0.2; pointer-events: none; transform: scale(0.95); }
+
+        /* --- TERMINAL VIP --- */
+        #vip-section { display: none; margin-top: 40px; padding: 25px; background: #000; border: 1px solid var(--accent-purple); border-radius: 16px; }
+        .log-container { font-family: 'Courier New', monospace; font-size: 0.85rem; height: 250px; overflow-y: auto; display: flex; flex-direction: column-reverse; border-top: 1px solid #111; padding-top: 15px; margin-top: 15px; }
+        .log-entry { margin-bottom: 8px; padding-left: 10px; border-left: 2px solid var(--accent-cyan); animation: slideIn 0.2s ease; line-height: 1.4; }
+
+        /* --- PRICING --- */
+        .pricing { padding: 80px 8%; text-align: center; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1200px; margin: 40px auto; }
+        .p-card { background: #0a0a0c; border: 1px solid var(--border); padding: 40px; border-radius: 28px; transition: 0.4s; display: flex; flex-direction: column; text-align: left; }
+        .p-card.featured { border: 2px solid var(--accent-purple); background: linear-gradient(180deg, #0d0d0e 0%, #16121d 100%); transform: scale(1.05); }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <h1 class="logo">BESI<span>.IA</span></h1>
+        <p class="tagline">SISTEMA QUANTITATIVO DE ALTA PRECISÃO</p>
+        <button class="btn-modern" onclick="startApp()">INICIALIZAR TERMINAL</button>
+    </div>
+
+    <header>
+        <div class="logo">BESI<span>.IA</span></div>
+        <div id="status-badge" style="color: var(--text-dim); font-size: 0.75rem; font-weight: bold; letter-spacing: 1px;">● AGUARDANDO AUTENTICAÇÃO</div>
+    </header>
+
+    <main class="dashboard">
+        <div class="grid-assets" id="assetGrid"></div>
+
+        <section id="vip-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div id="terminal-title" style="color: var(--accent-purple); font-family: 'Space Grotesk'; font-size: 1rem; font-weight: bold;"></div>
+                    <div style="color: var(--success); font-size: 0.7rem; margin-top: 4px;">● CONEXÃO WEBSOCKET ESTABELECIDA (BINANCE)</div>
+                </div>
+                <button class="btn-modern" style="padding: 10px 20px; font-size: 0.7rem; background: #222;" onclick="voltar()">← VOLTAR AO MENU</button>
+            </div>
+            <div class="log-container" id="terminalLog"></div>
+        </section>
+    </main>
+
+    <section id="pricing-area" class="pricing">
+        <h2 style="font-family: 'Space Grotesk'; font-size: 2.5rem; margin-bottom: 10px;">Licenças de Acesso Alpha</h2>
+        <div class="pricing-grid">
+            <div class="p-card" onclick="ativarSistema('SOLO')">
+                <span style="font-size: 0.7rem; color: var(--accent-cyan); font-weight: 700;">NÍVEL 01</span>
+                <h3>SOLO</h3>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin: 15px 0; flex-grow: 1;">Acesso ao feed real do Bitcoin com alertas básicos de variação de preço. Monitoramento simples e direto.</p>
+                <button class="btn-modern" style="background: #222; width: 100%;">ATIVAR SOLO</button>
+            </div>
+
+            <div class="p-card featured" onclick="ativarSistema('PRO')">
+                <span style="font-size: 0.7rem; color: var(--accent-purple); font-weight: 700;">NÍVEL 02</span>
+                <h3>ALPHA PRO</h3>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin: 15px 0; flex-grow: 1;">Scanner HFT para BTC, ETH e SOL. Identifica entradas de volume e volatilidade em milissegundos.</p>
+                <button class="btn-modern" style="width: 100%;">ATIVAR PRO</button>
+            </div>
+
+            <div class="p-card" onclick="ativarSistema('DIAMOND')">
+                <span style="font-size: 0.7rem; color: var(--accent-cyan); font-weight: 700;">NÍVEL 03</span>
+                <h3>DIAMOND</h3>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin: 15px 0; flex-grow: 1;">IA Preditiva Elite. Sinaliza zonas de exaustão (Sobrecompra/venda) em todos os ativos do terminal.</p>
+                <button class="btn-modern" style="background: var(--accent-cyan); width: 100%;">ATIVAR DIAMOND</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const assets = [
+            { symbol: 'btcusdt', label: 'BTC/USDT', lastPrice: 0, tier: 'SOLO' },
+            { symbol: 'ethusdt', label: 'ETH/USDT', lastPrice: 0, tier: 'PRO' },
+            { symbol: 'solusdt', label: 'SOL/USDT', lastPrice: 0, tier: 'PRO' },
+            { symbol: 'adausdt', label: 'ADA/USDT', lastPrice: 0, tier: 'DIAMOND' },
+            { symbol: 'dotusdt', label: 'DOT/USDT', lastPrice: 0, tier: 'DIAMOND' },
+            { symbol: 'xrpusdt', label: 'XRP/USDT', lastPrice: 0, tier: 'DIAMOND' }
+        ];
+
+        let currentTier = null;
+
+        function startApp() {
+            document.getElementById('loader').style.display = 'none';
+            initMarket();
+        }
+
+        function initMarket() {
+            const grid = document.getElementById('assetGrid');
+            assets.forEach(asset => {
+                const card = document.createElement('div');
+                card.className = `asset-card locked`;
+                card.id = `card-${asset.symbol}`;
+                card.innerHTML = `
+                    <div style="color:var(--accent-cyan); font-weight:bold; font-size:0.7rem; letter-spacing:1px;">${asset.label}</div>
+                    <div id="prc-${asset.symbol}" style="font-size:1.6rem; font-weight:700; margin:8px 0;">$0.00</div>
+                    <div id="chg-${asset.symbol}" style="font-size:0.85rem; font-weight:600;">0.00%</div>
+                `;
+                grid.appendChild(card);
+
+                const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${asset.symbol}@ticker`);
+                ws.onmessage = (e) => {
+                    const d = JSON.parse(e.data);
+                    const price = parseFloat(d.c);
+                    const change = parseFloat(d.P);
+                    
+                    document.getElementById(`prc-${asset.symbol}`).innerText = price.toLocaleString('en-US', {style:'currency', currency:'USD'});
+                    const chgEl = document.getElementById(`chg-${asset.symbol}`);
+                    chgEl.innerText = (change >= 0 ? '+' : '') + change + '%';
+                    chgEl.style.color = change >= 0 ? 'var(--success)' : 'var(--danger)';
+
+                    if(currentTier) processarIA(asset, price, change);
+                    asset.lastPrice = price;
+                };
+            });
+        }
+
+        function ativarSistema(tier) {
+            currentTier = tier;
+            document.getElementById('pricing-area').style.display = 'none';
+            document.getElementById('vip-section').style.display = 'block';
+            document.getElementById('terminal-title').innerText = `[ TERMINAL IA - MODO ${tier} ]`;
+            document.getElementById('status-badge').innerText = `● ACESSO ${tier} ATIVO`;
+            document.getElementById('status-badge').style.color = 'var(--success)';
+            
+            assets.forEach(a => {
+                const el = document.getElementById(`card-${a.symbol}`);
+                el.classList.add('locked');
+                if(tier === 'DIAMOND') el.classList.remove('locked');
+                if(tier === 'PRO' && (a.tier === 'SOLO' || a.tier === 'PRO')) el.classList.remove('locked');
+                if(tier === 'SOLO' && a.tier === 'SOLO') el.classList.remove('locked');
+            });
+            window.scrollTo(0,0);
+        }
+
+        function processarIA(asset, price, change) {
+            const log = document.getElementById('terminalLog');
+            let msg = "";
+
+            if (currentTier === 'SOLO' && asset.symbol === 'btcusdt') {
+                if (Math.abs(price - asset.lastPrice) > 10) msg = `Monitor: BTC variando para $${price.toFixed(2)}`;
+            } 
+            else if (currentTier === 'PRO' && (asset.tier === 'SOLO' || asset.tier === 'PRO')) {
+                if (asset.lastPrice > 0 && Math.abs(price - asset.lastPrice) > (asset.lastPrice * 0.0003)) {
+                    msg = `HFT Scanner: Movimento rápido em ${asset.label} detectado ($${price.toFixed(2)})`;
+                }
+            }
+            else if (currentTier === 'DIAMOND') {
+                if (change > 3) msg = `💎 IA DIAMOND: ${asset.label} em zona de SOBRECOMPRA. Risco de correção.`;
+                else if (change < -3) msg = `💎 IA DIAMOND: ${asset.label} em zona de SOBREVENDA. Oportunidade.`;
+                else if (asset.lastPrice > 0 && Math.abs(price - asset.lastPrice) > (asset.lastPrice * 0.0005)) {
+                    msg = `IA DIAMOND: Baleia detectada em ${asset.label} a $${price.toFixed(2)}`;
+                }
+            }
+
+            if (msg) {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `<span style="color:#666">[${new Date().toLocaleTimeString()}]</span> > ${msg}`;
+                log.prepend(entry);
+                if (log.children.length > 50) log.lastElementChild.remove();
+            }
+        }
+
+        function voltar() {
+            document.getElementById('vip-section').style.display = 'none';
+            document.getElementById('pricing-area').style.display = 'block';
+            currentTier = null;
+            assets.forEach(a => document.getElementById(`card-${a.symbol}`).classList.add('locked'));
+            document.getElementById('status-badge').innerText = `● AGUARDANDO AUTENTICAÇÃO`;
+            document.getElementById('status-badge').style.color = 'var(--text-dim)';
+        }
+    </script>
+</body>
+</html>
